@@ -1,59 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <title>Home</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </head>
 
-<head>
-  <title>Home</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12" style="width: 50%">
+          <br />
 
-<body>
+          <div class="mx-auto" style="width: 100%">
+            <h2>Upload your picture for room entrance authentication</h2>
+          </div>
 
-  <div class="container">
-    <br>
-    <div class="mx-auto" style="width: 600px;">
-      <h2>Upload Your picture for room entrance authentication</h2>
+          <br /><br /><br />
+
+          <div class="row" style="background-color: whitesmoke; padding: 10px">
+            <form action="/success" method="post" enctype="multipart/form-data">
+              <div class="col">
+                <div class="mb-3 row">
+                  <label for="inputGroupFile02">Registration Photo</label>
+                  <input
+                    type="file"
+                    name="file"
+                    class="form-control"
+                    id="inputGroupFile02"
+                  />
+                </div>
+
+                <div class="mb-3 row">
+                  <label for="inputGroupFile03">Name</label>
+                  <input
+                    type="text"
+                    name="username"
+                    class="form-control"
+                    id="inputGroupFile03"
+                  />
+                </div>
+
+                <div class="mb-3 row">
+                  <label for="inputGroupFile03">Room Number</label>
+                  <input
+                    type="text"
+                    name="room"
+                    class="form-control"
+                    id="inputGroupFile03"
+                  />
+                </div>
+
+                <div class="row">
+                  <button
+                    type="submit"
+                    value="Upload"
+                    class="btn btn-primary mb-3"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="col-md-12" style="width: 50%">
+          <br />
+
+          <div class="mx-auto" style="width: 100%">
+            <h2>Select room and start authentication</h2>
+          </div>
+
+          <br /><br /><br />
+          <div class="row" style="background-color: whitesmoke; padding: 10px">
+            <form action="/success" method="post" enctype="multipart/form-data">
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <br><br><br>
-
-    <form action="/success" method="post" enctype="multipart/form-data">
-
-      <div class="col">
-
-        <div class="mb-3 row">
-          <label for="inputGroupFile02">File</label>
-          <input type="file" name="file" class="form-control" id="inputGroupFile02">
-        </div>
-        
-        <div class="mb-3 row">
-          <label for="inputGroupFile03">Filename</label>
-          <input type="text" name="filename" class="form-control" id="inputGroupFile03">
-        </div>
-
-        <div class="row">
-          <button type="submit" value="Upload" class="btn btn-primary mb-3">Submit</button>
-        </div>
-
-      </div>
-    </form>
-  </div>
-
-  <div class="mx-auto" style="width: 1150px;">
-    <ul>
-      <li class="text-danger">Please Upload Png, Jpg, Jpeg, Gif Format only</li>
-    </ul>
-  </div>
-
-  <div class="mx-auto" style="width: 150px;">
-    <a href="http://127.0.0.1:80/index">
-      <button type="button" class="btn btn-success">Start camera</button>
-    </a>
-  </div>
-</body>
-
+    <div class="mx-auto" style="width: 150px">
+      <a href={{url_for('index', rns=set_room) }}>
+        <button type="button" class="btn btn-success">Start camera</button>
+      </a>
+    </div>
+  </body>
 </html>

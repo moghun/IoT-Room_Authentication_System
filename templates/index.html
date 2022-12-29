@@ -15,11 +15,11 @@
   </nav>
   <br>
   <div class="mx-auto" style="width: 700px;">
-    <img src="{{ url_for('video_feed') }}">
+    <img src="{{ url_for('video_feed', room = room_number) }}">
   </div>
-
   <br><br>
   <div class="mx-auto" style="width: 150px;">
+    
     <a href="http://127.0.0.1:80/">
       <button type="button" class="btn btn-success">Upload New image</button>
     </a>

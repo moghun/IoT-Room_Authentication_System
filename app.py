@@ -10,7 +10,7 @@ from flask import Flask, request, render_template, Response
 from pathlib import Path
 
 currentFile = Path(__file__).parent
-UPLOAD_FOLDER = os.path.join(currentFile, "IMAGE_FILES")
+UPLOAD_FOLDER = os.path.join(currentFile, "registrations")
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
@@ -37,16 +37,24 @@ def success():
         # flash('No file part')
         return render_template('upload.html')
     file = request.files['file']
-    filename = request.form['filename']
-    print(filename)
+    username = request.form['username']
+    room = request.form['room']
+    print(username, room)
     if file.filename == '':
         # flash('No image selected for uploading')
         return render_template('upload.html')
-    if file and filename and allowed_file(file.filename):
-        filename = filename + "." + get_extension(file.filename)
+    if file and username and room and allowed_file(file.filename):
+        filename = username + "_room-" + room + "." + get_extension(file.filename)
         print(filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return render_template('upload.html')
+        room_folder = "room-" + room
+        room_path = os.path.join(app.config['UPLOAD_FOLDER'], room_folder)
+        print(room_path)
+        if os.path.isdir(room_path) == False:
+            os.mkdir(room_path)
+
+        file.save(os.path.join(room_path, filename))
+
+        return render_template('upload.html', set_room=room)
     else:
         return render_template('upload.html')
 
@@ -54,19 +62,33 @@ def success():
 @app.route('/index')
 def index():
     """Video streaming home page."""
-    return render_template('index.html')
+    rnumber = request.args.get('rns', None)
+    print(request.args)
+    return render_template('index.html', room_number=rnumber)
 
 
-def gen():
+def gen(room_input="ALL"):
     IMAGE_FILES = []
     filename = []
     dir_path = UPLOAD_FOLDER
 
-    for imagess in os.listdir(dir_path):
-        img_path = os.path.join(dir_path, imagess)
-        img_path = face_recognition.load_image_file(img_path)  # reading image and append to list
-        IMAGE_FILES.append(img_path)
-        filename.append(imagess.split(".", 1)[0])
+    if room_input == "ALL":
+        for room in os.listdir(dir_path):
+            room_path = os.path.join(dir_path, room)
+            for images in os.listdir(room_path):
+                img_path = os.path.join(room_path, images)
+                img_path = face_recognition.load_image_file(img_path)  # reading image and append to list
+                IMAGE_FILES.append(img_path)
+                filename.append(images.split(".", 1)[0])
+    else:
+        room_fname = "room-"+str(room_input)
+        room_path = os.path.join(dir_path, room_fname)
+        for images in os.listdir(room_path):
+            img_path = os.path.join(room_path, images)
+            img_path = face_recognition.load_image_file(img_path)  # reading image and append to list
+            IMAGE_FILES.append(img_path)
+            filename.append(images.split(".", 1)[0])
+
 
     def encoding_img(IMAGE_FILES):
         encodeList = []
@@ -94,6 +116,7 @@ def gen():
         for encodeFace, faceloc in zip(encode_fasescurrent, fasescurrent):
             matches_face = face_recognition.compare_faces(encodeListknown, encodeFace)
             face_distence = face_recognition.face_distance(encodeListknown, encodeFace)
+
             # print(face_distence)
             # finding minimum distence index that will return best match
             matchindex = np.argmin(face_distence)
@@ -104,9 +127,17 @@ def gen():
                 y1, x2, y2, x1 = faceloc
                 # multiply locations by 4 because we above we reduced our webcam input image by 0.25
                 # y1,x2,y2,x1 = y1*4,x2*4,y2*4,x1*4
-                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
-                cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (255, 0, 0), 2, cv2.FILLED)
+                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 255, 0), 2, cv2.FILLED)
                 cv2.putText(img, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+            else:
+                y1, x2, y2, x1 = faceloc
+                # multiply locations by 4 because we above we reduced our webcam input image by 0.25
+                # y1,x2,y2,x1 = y1*4,x2*4,y2*4,x1*4
+                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 5)
+                cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (255, 0, 255), 5, cv2.FILLED)
+                cv2.putText(img, "NOT REGISTERED", (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
         frame = cv2.imencode('.jpg', img)[1].tobytes()
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -118,7 +149,10 @@ def gen():
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(),
+    room_number = request.args.get('room', None)
+    print(request.args)
+
+    return Response(gen(room_number),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
