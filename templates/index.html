@@ -11,10 +11,19 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 
-<body>
+<body style=" height: 900px;background-image: linear-gradient(
+                to bottom,
+                rgba(255, 91, 2, 0.551) 0%,
+                rgba(255, 171, 25, 0.767) 100%
+              ); ">
+
+  <div class="mx-auto" style="width: 100%;margin-top: 40px;text-align: center;">
+        <h2>Room-{{room_number}} Authentication Camera</h2>
+  </div>
+
   </nav>
   <br>
-  <div class="mx-auto" style="margin: 40px">
+  <div class="mx-auto" style="padding-left: 100px; margin: 20px">
     <img src="{{ url_for('video_feed', room = room_number) }}">
   </div>
   <div class="mx-auto" style="width: 150px;">
