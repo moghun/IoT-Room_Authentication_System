@@ -1,5 +1,5 @@
 5c5b157c-b0f5-4e88-9f68-571e81a82a39    mizbah@sabanciuniv.edu  Mizbah  2
 43193f04-fcc2-4658-9f0b-198e4e7dff7c	mertture@sabanciuniv.edu    Mert    1
-1dc89a58-5174-4bd1-9bd8-c94abcfbfa75    bbbb@sabanciuniv.edu    Kalender    1 3 4 5 2 6 6 6 6
-cfc420d9-4cfd-489e-84d5-e85e673b509d    morhun@sabanciuniv.edu  Orhun   6 1 3 5
-65ba38ea-99fa-4d8f-aed9-6be706d870fe    aaaa@sabanciuniv.edu    Omer    1 2 3 4 5 2 5 4
+1dc89a58-5174-4bd1-9bd8-c94abcfbfa75    bbbb@sabanciuniv.edu    Kalender    1 2 3 4 5 6
+cfc420d9-4cfd-489e-84d5-e85e673b509d    morhun@sabanciuniv.edu  Orhun   1 3 5 6
+65ba38ea-99fa-4d8f-aed9-6be706d870fe    aaaa@sabanciuniv.edu    Omer    2 4 5
