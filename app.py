@@ -12,7 +12,11 @@ from pathlib import Path
 currentFile = Path(__file__).parent
 UPLOAD_FOLDER = os.path.join(currentFile, "registrations")
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+room_ids = []
 
+for room in os.listdir(UPLOAD_FOLDER):
+    room_ids.append(room)
+room_ids.sort()
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -28,43 +32,50 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
 def upload_file():
-    return render_template('upload.html')
+    global room_ids
+    return render_template('upload.html', roomIDs = room_ids)
 
 
 @app.route('/success', methods=['GET', 'POST'])
 def success():
+    global room_ids
+
     if 'file' not in request.files:
         # flash('No file part')
         return render_template('upload.html')
     file = request.files['file']
     username = request.form['username']
     room = request.form['room']
-    print(username, room)
     if file.filename == '':
         # flash('No image selected for uploading')
-        return render_template('upload.html')
+        return render_template('upload.html', roomIDs = room_ids)
     if file and username and room and allowed_file(file.filename):
         filename = username + "_room-" + room + "." + get_extension(file.filename)
         print(filename)
         room_folder = "room-" + room
+        
         room_path = os.path.join(app.config['UPLOAD_FOLDER'], room_folder)
         print(room_path)
         if os.path.isdir(room_path) == False:
             os.mkdir(room_path)
+            room_ids.append(room_folder)
+            room_ids.sort()
 
         file.save(os.path.join(room_path, filename))
 
-        return render_template('upload.html', set_room=room)
+        return render_template('upload.html', roomIDs = room_ids)
     else:
-        return render_template('upload.html')
+        return render_template('upload.html', roomIDs = room_ids)
 
 
-@app.route('/index')
+@app.route('/index', methods=['GET', 'POST'])
 def index():
     """Video streaming home page."""
-    rnumber = request.args.get('rns', None)
-    print(request.args)
-    return render_template('index.html', room_number=rnumber)
+    #rnumber = ['rns']
+    print("form", request.form)
+    rn = request.form["room_id"]
+    formatted_rn = rn[5:]
+    return render_template('index.html', room_number=formatted_rn)
 
 
 def gen(room_input="ALL"):
