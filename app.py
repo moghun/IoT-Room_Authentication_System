@@ -63,6 +63,8 @@ def success():
 
         file.save(os.path.join(room_path, filename))
 
+        register_to_users(username, "morhun@sabanciuniv.edu", room)
+
         return render_template('upload.html', roomIDs = room_ids)
     else:
         return render_template('upload.html', roomIDs = room_ids)
@@ -76,6 +78,33 @@ def index():
     rn = request.form["room_id"]
     formatted_rn = rn[5:]
     return render_template('index.html', room_number=formatted_rn)
+
+
+def register_to_users(username, email, room):
+    exist = False
+    lines = []
+    with open("users/users.txt", "r") as file:
+        lines = file.readlines()
+        for line in lines:
+            if username in line:
+                print("room",username)
+                nl = line.strip("\n") + " " + room + "\n"
+                lines.remove(line)
+                print(1,lines)
+                lines.append(nl)
+                exist = True
+                break
+            print(1)
+
+    with open("users/users.txt", 'w') as f:
+        for line in lines:
+            f.write(f"{line}")
+
+    if exist == False:
+        with open('users/users.txt', 'a') as fd:
+            print("OHOOOOO")
+            fd.write(email + "\t" +username + "\t" + room + "\n")
+
 
 
 def gen(room_input="ALL"):
@@ -155,7 +184,6 @@ def gen(room_input="ALL"):
         key = cv2.waitKey(20)
         if key == 27:
             break
-
 
 @app.route('/video_feed')
 def video_feed():
