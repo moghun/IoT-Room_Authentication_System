@@ -2,17 +2,30 @@
 # RUN THIS IN TERMINAL
 # pip3 install dlib --force-reinstall --no-cache-dir --global-option=build_ext
 
+from flask_cors import CORS
 import cv2
 import numpy as np
 import face_recognition
+import requests
 import os
 from flask import Flask, request, render_template, Response
 from pathlib import Path
+from PIL import Image
+import io
+import base64
+
+
+app = Flask(__name__)
+CORS(app)
+
+
 
 currentFile = Path(__file__).parent
 UPLOAD_FOLDER = os.path.join(currentFile, "registrations")
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 room_ids = []
+image = []
+frame = []
 
 for room in os.listdir(UPLOAD_FOLDER):
     room_ids.append(room)
@@ -82,7 +95,8 @@ def gen(room_input="ALL"):
     IMAGE_FILES = []
     filename = []
     dir_path = UPLOAD_FOLDER
-
+    global image
+    global frame
     if room_input == "ALL":
         for room in os.listdir(dir_path):
             room_path = os.path.join(dir_path, room)
@@ -110,13 +124,12 @@ def gen(room_input="ALL"):
         return encodeList
 
     encodeListknown = encoding_img(IMAGE_FILES)
-    cap = cv2.VideoCapture(0)
 
-    while True:
-        success, img = cap.read()
-        imgc = cv2.resize(img, (0, 0), None, 0.25, 0.25)
+
+    try: 
+        imgc = cv2.resize(image, (0, 0), None, 0.25, 0.25)
         # converting image to RGB from BGR
-        imgc = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        imgc = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         fasescurrent = face_recognition.face_locations(imgc)
         encode_fasescurrent = face_recognition.face_encodings(imgc, fasescurrent)
@@ -138,34 +151,49 @@ def gen(room_input="ALL"):
                 y1, x2, y2, x1 = faceloc
                 # multiply locations by 4 because we above we reduced our webcam input image by 0.25
                 # y1,x2,y2,x1 = y1*4,x2*4,y2*4,x1*4
-                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 255, 0), 2, cv2.FILLED)
-                cv2.putText(img, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.rectangle(image, (x1, y2 - 35), (x2, y2), (0, 255, 0), 2, cv2.FILLED)
+                cv2.putText(image, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
             else:
                 y1, x2, y2, x1 = faceloc
                 # multiply locations by 4 because we above we reduced our webcam input image by 0.25
                 # y1,x2,y2,x1 = y1*4,x2*4,y2*4,x1*4
-                cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 5)
-                cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (255, 0, 255), 5, cv2.FILLED)
-                cv2.putText(img, "NOT REGISTERED", (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 255), 5)
+                cv2.rectangle(image, (x1, y2 - 35), (x2, y2), (255, 0, 255), 5, cv2.FILLED)
+                cv2.putText(image, "NOT REGISTERED", (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
-        frame = cv2.imencode('.jpg', img)[1].tobytes()
-        yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-        key = cv2.waitKey(20)
-        if key == 27:
-            break
+        frame = cv2.imencode('.jpg', image)[1].tobytes()
+        
+    except Exception as e:
+        print("error:", e)
+        pass
 
 
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     room_number = request.args.get('room', None)
-    print(request.args)
+    gen(room_number)
+    frame_base64 = base64.b64encode(frame).decode('utf-8')
 
-    return Response(gen(room_number),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    return render_template("index.html", frame=frame_base64)
 
+
+
+
+
+@app.route('/get_video', methods=['POST'], strict_slashes=False)
+def get_video():
+    file = request.files['image']
+    data = Image.open(file.stream)
+    global image
+    img_rgb = np.array(data)
+    data = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2RGB)
+
+    image = data
+    return "True"
+    
 
 if __name__ == "__main__":
     app.run(debug=True , host="0.0.0.0", port="80")

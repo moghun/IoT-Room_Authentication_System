@@ -14,9 +14,24 @@
 <body>
   </nav>
   <br>
-  <div class="mx-auto" style="margin: 40px">
+
+  <body id="body">
+		<img src="data:image/jpeg;base64, {{frame}}" />
+	</body>
+	<script>
+		var body = document.getElementById("body");
+		setInterval(() => {
+			fetch("{{ url_for('video_feed', room = room_number) }}").then((response) => {
+				response.text().then((image) => {
+					body.innerHTML = image;
+				});
+			});
+		}, 1000);
+	</script>
+
+  <!-- <div class="mx-auto" style="margin: 40px">
     <img src="{{ url_for('video_feed', room = room_number) }}">
-  </div>
+  </div> -->
   <div class="mx-auto" style="width: 150px;">
     <a href="http://127.0.0.1:80/">
       <button type="button" class="btn btn-success">Return Room Selection</button>
