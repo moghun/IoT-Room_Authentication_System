@@ -8,6 +8,8 @@ import face_recognition
 import os
 from flask import Flask, request, render_template, Response
 from pathlib import Path
+import uuid
+
 
 currentFile = Path(__file__).parent
 UPLOAD_FOLDER = os.path.join(currentFile, "registrations")
@@ -44,6 +46,7 @@ def success():
         # flash('No file part')
         return render_template('upload.html')
     file = request.files['file']
+    email = request.form['email']
     username = request.form['username']
     room = request.form['room']
     if file.filename == '':
@@ -61,9 +64,18 @@ def success():
             room_ids.append(room_folder)
             room_ids.sort()
 
-        file.save(os.path.join(room_path, filename))
 
-        register_to_users(username, "morhun@sabanciuniv.edu", room)
+        file_dir_name = os.path.join(room_path, filename)
+        
+        file.save(file_dir_name)
+
+        uid = register_to_users(username, email, room)
+        user_template_name = "_room-" + room + "." + get_extension(file.filename)
+        latest_dir_name = os.path.join(room_path, (str(uid)+user_template_name))
+
+        print(latest_dir_name)
+
+        os.rename(file_dir_name, latest_dir_name)
 
         return render_template('upload.html', roomIDs = room_ids)
     else:
@@ -73,7 +85,6 @@ def success():
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     """Video streaming home page."""
-    #rnumber = ['rns']
     print("form", request.form)
     rn = request.form["room_id"]
     formatted_rn = rn[5:]
@@ -83,6 +94,7 @@ def index():
 def register_to_users(username, email, room):
     exist = False
     lines = []
+    uid = ""
     with open("users/users.txt", "r") as file:
         lines = file.readlines()
         for line in lines:
@@ -90,11 +102,10 @@ def register_to_users(username, email, room):
                 print("room",username)
                 nl = line.strip("\n") + " " + room + "\n"
                 lines.remove(line)
-                print(1,lines)
                 lines.append(nl)
                 exist = True
+                uid = line.split("   ")[0]
                 break
-            print(1)
 
     with open("users/users.txt", 'w') as f:
         for line in lines:
@@ -102,10 +113,23 @@ def register_to_users(username, email, room):
 
     if exist == False:
         with open('users/users.txt', 'a') as fd:
-            print("OHOOOOO")
-            fd.write(email + "\t" +username + "\t" + room + "\n")
+            uid = uuid.uuid4()
+            fd.write(str(uid) + "\t" + email + "\t" +username + "\t" + room + "\n")
 
+    return uid
 
+def get_user_name(uid):
+    uid = uid.lower()
+    name = ""
+    mail = ""
+    with open("users/users.txt", "r") as file:
+        lines = file.readlines()
+        for line in lines:
+            if uid in line:
+                name = line.split(" ")[6]
+                mail = line.split(" ")[4]
+                break
+    return name, mail
 
 def gen(room_input="ALL"):
     IMAGE_FILES = []
@@ -162,14 +186,16 @@ def gen(room_input="ALL"):
             matchindex = np.argmin(face_distence)
 
             if matches_face[matchindex]:
-                name = filename[matchindex].upper()
+                uid = filename[matchindex].upper()
                 # print(name)
                 y1, x2, y2, x1 = faceloc
                 # multiply locations by 4 because we above we reduced our webcam input image by 0.25
                 # y1,x2,y2,x1 = y1*4,x2*4,y2*4,x1*4
+                name, mail = get_user_name(uid.split("_")[0])
+                mail = mail.split("@")[0] + "@" + uid[:3]
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (0, 255, 0), 2, cv2.FILLED)
-                cv2.putText(img, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                cv2.rectangle(img, (x1 - 65, y2), (x2 + 65, y2+70), (0, 255, 0), 2, cv2.FILLED)
+                cv2.putText(img, name+" - "+mail, (x1 - 60, y2 + 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
             else:
                 y1, x2, y2, x1 = faceloc
@@ -189,7 +215,6 @@ def gen(room_input="ALL"):
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     room_number = request.args.get('room', None)
-    print(request.args)
 
     return Response(gen(room_number),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
