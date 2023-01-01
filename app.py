@@ -9,7 +9,13 @@ import os
 from flask import Flask, request, render_template, Response
 from pathlib import Path
 import uuid
+import zmq
+import base64
+import imagezmq
 
+image_hub = imagezmq.ImageHub(open_port='tcp://localhost:5555', REQ_REP=False)
+image_hub.zmq_socket.setsockopt(zmq.CONFLATE, 0)
+image_hub.zmq_socket.setsockopt(zmq.RCVHWM, 1)
 
 currentFile = Path(__file__).parent
 UPLOAD_FOLDER = os.path.join(currentFile, "registrations")
@@ -164,10 +170,12 @@ def gen(room_input="ALL"):
         return encodeList
 
     encodeListknown = encoding_img(IMAGE_FILES)
-    cap = cv2.VideoCapture(0)
+#    cap = cv2.VideoCapture(0)
 
     while True:
-        success, img = cap.read()
+        rpi_name, img = image_hub.recv_image()
+        
+#        success, img = cap.read()
         imgc = cv2.resize(img, (0, 0), None, 0.25, 0.25)
         # converting image to RGB from BGR
         imgc = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
