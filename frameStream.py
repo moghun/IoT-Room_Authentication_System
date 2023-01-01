@@ -27,7 +27,6 @@ class frameStream():
 class VideoStreamWidget(object):
     def __init__(self, src=0, onRPI=False):
         self.sender = imagezmq.ImageSender(connect_to='tcp://*:5555', REQ_REP=False)
-        #sender.zmq_socket.connect('tcp://*:5555')
         self.sender.zmq_socket.setsockopt(zmq.CONFLATE, 1)
         self.sender.zmq_socket.setsockopt(zmq.SNDHWM, 1)
         self.sender.zmq_socket.setsockopt( zmq.LINGER, 0 )

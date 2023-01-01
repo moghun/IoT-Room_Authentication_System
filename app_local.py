@@ -9,24 +9,12 @@ import os
 from flask import Flask, request, render_template, Response
 from pathlib import Path
 import uuid
-import zmq
-import base64
-import imagezmq
 
-from threading import Thread
-
-from frameStream import frameStream, VideoStreamWidget
-
-image_hub = imagezmq.ImageHub(open_port='tcp://localhost:5555', REQ_REP=False)
-image_hub.zmq_socket.setsockopt(zmq.CONFLATE, 1)
-image_hub.zmq_socket.setsockopt(zmq.RCVHWM, 1)
-image_hub.zmq_socket.setsockopt( zmq.LINGER, 0 )
 
 currentFile = Path(__file__).parent
 UPLOAD_FOLDER = os.path.join(currentFile, "registrations")
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 room_ids = []
-streaming_flag = False
 
 for room in os.listdir(UPLOAD_FOLDER):
     room_ids.append(room)
@@ -47,16 +35,12 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 @app.route('/')
 def upload_file():
     global room_ids
-    global streaming_flag
-    streaming_flag = False
     return render_template('upload.html', roomIDs = room_ids)
 
 
 @app.route('/success', methods=['GET', 'POST'])
 def success():
     global room_ids
-    global streaming_flag
-    streaming_flag = False
 
     if 'file' not in request.files:
         # flash('No file part')
@@ -142,7 +126,6 @@ def get_user_name(uid):
         lines = file.readlines()
         for line in lines:
             if uid in line:
-                print(line.split("\t"))
                 name = line.split("\t")[2]
                 mail = line.split("\t")[1]
                 break
@@ -180,10 +163,10 @@ def gen(room_input="ALL"):
         return encodeList
 
     encodeListknown = encoding_img(IMAGE_FILES)
+    cap = cv2.VideoCapture(0)
+
     while True:
-        rpi_name, img = image_hub.recv_image()
-        
-#        success, img = cap.read()
+        success, img = cap.read()
         imgc = cv2.resize(img, (0, 0), None, 0.25, 0.25)
         # converting image to RGB from BGR
         imgc = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -228,19 +211,11 @@ def gen(room_input="ALL"):
         if key == 27:
             break
 
-def start_streaming():
-    fs = frameStream()
-    fs.start()
-
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     room_number = request.args.get('room', None)
-    global streaming_flag
-    if streaming_flag == False:
-        streaming_flag = True
-        streamer = Thread(target = start_streaming, args=())
-        streamer.start()
+
     return Response(gen(room_number),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
