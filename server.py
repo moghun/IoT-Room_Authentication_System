@@ -13,10 +13,19 @@ import zmq
 import base64
 import imagezmq
 import time
+import paramiko
+from scp import SCPClient
+
+from base64 import decodebytes
+
+
+
 
 from threading import Thread, Event
 
 from frameStream import frameStream, VideoStreamWidget
+
+remote_connection = False
 
 image_hub = imagezmq.ImageHub(open_port='tcp://localhost:5555', REQ_REP=False)
 image_hub.zmq_socket.setsockopt(zmq.CONFLATE, 1)
@@ -253,7 +262,7 @@ def video_feed():
     global streaming_flag
     global streamer
     print("Other frame stream:", streaming_flag)
-    if streaming_flag == False:
+    if streaming_flag == False and remote_connection == False:
         streaming_flag = True
         streamer = Thread(target = start_streaming, args=())
         streamer.start()
@@ -262,7 +271,30 @@ def video_feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-def start_server():
+def start_server(isRM = False):
+    if isRM == True:
+        #remote_connection = True
+        # ssh.connect("127.0.0.1", username = "morhun", password = "soba1905")
+        # ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # print("abc")
+        # scp = SCPClient(ssh.get_transport())
+        # scp.put("./, recursive=True, remote_path="/tmp/frameStream")
+        # run_sudo_command(ssh, "soba1905", "morhun", "sudo python3 tmp/frameStream/frameStream.py")
+        pass
+    
     app.run(debug=False , host="0.0.0.0", port="80")
     print("Program ended")
 
+def run_sudo_command(ssh_client, SSHkey, name, command):
+
+    transport = ssh_client.get_transport()
+    session = transport.open_session()
+    session.set_combine_stderr(True)
+    session.get_pty()
+    stdin = session.makefile('wb', -1)
+    stdout = session.makefile('rb', -1)
+    session.exec_command(command)
+    stdin.write(SSHkey + '\n')
+    stdin.flush()
+
+    print("Executing command on", name, ":", command)
