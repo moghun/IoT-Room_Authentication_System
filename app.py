@@ -126,8 +126,9 @@ def get_user_name(uid):
         lines = file.readlines()
         for line in lines:
             if uid in line:
-                name = line.split(" ")[6]
-                mail = line.split(" ")[4]
+                print(line.split("\t"))
+                name = line.split("\t")[2]
+                mail = line.split("\t")[1]
                 break
     return name, mail
 
