@@ -11,14 +11,30 @@ import socket
 from threading import Thread
 
 
-sender = imagezmq.ImageSender(connect_to='tcp://*:5555', REQ_REP=False)
-sender.zmq_socket.setsockopt(zmq.CONFLATE, 1)
-sender.zmq_socket.setsockopt(zmq.SNDHWM, 1)
-sender.zmq_socket.setsockopt( zmq.LINGER, 0 )
+class frameStream():
+    def __init__(self, room_id=0):
+        self.video_stream_widget = VideoStreamWidget(room_id)
+
+    def start(self):
+        while True:
+            try:
+                self.video_stream_widget.send_frame()
+            except AttributeError:
+                pass
+
 
  
 class VideoStreamWidget(object):
-    def __init__(self, src=0):
+    def __init__(self, src=0, onRPI=False):
+        self.sender = imagezmq.ImageSender(connect_to='tcp://*:5555', REQ_REP=False)
+        #sender.zmq_socket.connect('tcp://*:5555')
+        self.sender.zmq_socket.setsockopt(zmq.CONFLATE, 1)
+        self.sender.zmq_socket.setsockopt(zmq.SNDHWM, 1)
+        self.sender.zmq_socket.setsockopt( zmq.LINGER, 0 )
+
+        if onRPI == False:
+            src = 0
+
         self.capture = cv2.VideoCapture(src)
         self.capture.set(cv2.CAP_PROP_BUFFERSIZE, 25)
         self.capture.set(3, 160)
@@ -38,9 +54,8 @@ class VideoStreamWidget(object):
     
     def send_frame(self):
         # Display frames in main program
-        sender.send_image(socket.gethostname(), cv2.resize(self.frame, (640, 480), fx=0, fy= 0,interpolation = cv2.INTER_CUBIC))
+        self.sender.send_image(socket.gethostname(), cv2.resize(self.frame, (640, 480), fx=0, fy= 0,interpolation = cv2.INTER_CUBIC))
         cv2.waitKey(int(200))
-
 
 if __name__ == '__main__':
     video_stream_widget = VideoStreamWidget()

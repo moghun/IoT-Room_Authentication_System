@@ -13,6 +13,10 @@ import zmq
 import base64
 import imagezmq
 
+from threading import Thread
+
+from frameStream import frameStream, VideoStreamWidget
+
 image_hub = imagezmq.ImageHub(open_port='tcp://localhost:5555', REQ_REP=False)
 image_hub.zmq_socket.setsockopt(zmq.CONFLATE, 1)
 image_hub.zmq_socket.setsockopt(zmq.RCVHWM, 1)
@@ -171,8 +175,6 @@ def gen(room_input="ALL"):
         return encodeList
 
     encodeListknown = encoding_img(IMAGE_FILES)
-#    cap = cv2.VideoCapture(0)
-
     while True:
         rpi_name, img = image_hub.recv_image()
         
@@ -221,15 +223,19 @@ def gen(room_input="ALL"):
         if key == 27:
             break
 
+def start_streaming():
+    fs = frameStream()
+    fs.start()
+
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     room_number = request.args.get('room', None)
-
+    streamer = Thread(target = start_streaming, args=())
+    streamer.start()
     return Response(gen(room_number),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == "__main__":
     app.run(debug=True , host="0.0.0.0", port="80")
-
