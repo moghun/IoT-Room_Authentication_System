@@ -194,7 +194,7 @@ def gen(room_input="ALL"):
     while streaming_flag:
         rpi_name, img = image_hub.recv_image()
         
-#        success, img = cap.read()
+#       success, img = cap.read()
         imgc = cv2.resize(img, (0, 0), None, 0.25, 0.25)
         # converting image to RGB from BGR
         imgc = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -240,10 +240,10 @@ def gen(room_input="ALL"):
             break
     
 
-def start_streaming():
-    fs = frameStream()
-    fs.start()
-    print("STREAM THREAD JOINED")
+# def start_streaming():
+#     fs = frameStream()
+#     fs.start()
+#     print("STREAM THREAD JOINED")
     
 
 @app.route('/video_feed')
@@ -255,8 +255,8 @@ def video_feed():
     print("Other frame stream:", streaming_flag)
     if streaming_flag == False:
         streaming_flag = True
-        streamer = Thread(target = start_streaming, args=())
-        streamer.start()
+        #streamer = Thread(target = start_streaming, args=())
+        #streamer.start()
         print("Remote capture started")
     return Response(gen(room_number),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -265,4 +265,3 @@ def video_feed():
 def start_server():
     app.run(debug=False , host="0.0.0.0", port="80")
     print("Program ended")
-

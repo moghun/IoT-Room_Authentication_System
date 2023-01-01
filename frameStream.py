@@ -30,16 +30,12 @@ class frameStream():
                 pass
         print("Stream from the remote device is ended")
 
-            
-            
 
-
- 
 class VideoStreamWidget(object):
     def __init__(self, src=0, onRPI=False):
         self.sender = imagezmq.ImageSender(connect_to='tcp://*:5555', REQ_REP=False)
         self.sender.zmq_socket.setsockopt(zmq.CONFLATE, 1)
-        self.sender.zmq_socket.setsockopt(zmq.SNDHWM, 1)
+        self.sender.zmq_socket.setsockopt(zmq.., 1)
         self.sender.zmq_socket.setsockopt( zmq.LINGER, 0 )
 
         if onRPI == False:
