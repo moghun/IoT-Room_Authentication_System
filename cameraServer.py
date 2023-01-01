@@ -8,32 +8,66 @@ import zmq
 import base64
 import imagezmq
 import socket
-
+from threading import Thread
 
 
 sender = imagezmq.ImageSender(connect_to='tcp://*:5555', REQ_REP=False)
-sender.zmq_socket.setsockopt(zmq.CONFLATE, 0)
+sender.zmq_socket.setsockopt(zmq.CONFLATE, 1)
 sender.zmq_socket.setsockopt(zmq.SNDHWM, 1)
+sender.zmq_socket.setsockopt( zmq.LINGER, 0 )
+
+ 
+class VideoStreamWidget(object):
+    def __init__(self, src=0):
+        self.capture = cv2.VideoCapture(src)
+        self.capture.set(cv2.CAP_PROP_BUFFERSIZE, 25)
+        self.capture.set(3, 160)
+        self.capture.set(4,120)
+        time.sleep(2)
+
+        # Start the thread to read frames from the video stream
+        self.thread = Thread(target=self.update, args=())
+        self.thread.daemon = True
+        self.thread.start()
 
 
-camera = cv2.VideoCapture(0)
-
-while True:
-    try:
-        (grabbed, frame) = camera.read()  # grab the current frame
-        sender.send_image(socket.gethostname(), frame)
-
-    except KeyboardInterrupt:
-        camera.release()
-        cv2.destroyAllWindows()
-        break
+    def update(self):
+        # Read the next frame from the stream in a different thread
+        while True:
+            (self.status, self.frame) = self.capture.read()
+    
+    def send_frame(self):
+        # Display frames in main program
+        sender.send_image(socket.gethostname(), cv2.resize(self.frame, (640, 480), fx=0, fy= 0,interpolation = cv2.INTER_CUBIC))
+        cv2.waitKey(int(200))
 
 
+if __name__ == '__main__':
+    video_stream_widget = VideoStreamWidget()
+    while True:
+        try:
+            video_stream_widget.send_frame()
+        except AttributeError:
+            pass
 
 
 
-            
 
 
+# camera = cv2.VideoCapture(0)
+# camera.set(cv2.CAP_PROP_BUFFERSIZE, 25)
+# camera.set(3, 160)
+# camera.set(4,120)
 
 
+# while True:
+#     try:
+#         (grabbed, frame) = camera.read()  # grab the current frame
+#         #frame = cv2.GaussianBlur(frame, (5,5), 0)
+#         sender.send_image(socket.gethostname(), cv2.resize(frame, (560, 420), fx=0, fy= 0,interpolation = cv2.INTER_CUBIC))
+#         cv2.waitKey(int(200))
+
+#     except KeyboardInterrupt:
+#         camera.release()
+#         cv2.destroyAllWindows()
+#         break

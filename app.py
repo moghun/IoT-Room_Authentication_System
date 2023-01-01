@@ -14,8 +14,9 @@ import base64
 import imagezmq
 
 image_hub = imagezmq.ImageHub(open_port='tcp://localhost:5555', REQ_REP=False)
-image_hub.zmq_socket.setsockopt(zmq.CONFLATE, 0)
+image_hub.zmq_socket.setsockopt(zmq.CONFLATE, 1)
 image_hub.zmq_socket.setsockopt(zmq.RCVHWM, 1)
+image_hub.zmq_socket.setsockopt( zmq.LINGER, 0 )
 
 currentFile = Path(__file__).parent
 UPLOAD_FOLDER = os.path.join(currentFile, "registrations")
