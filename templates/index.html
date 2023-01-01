@@ -23,8 +23,12 @@
 
   </nav>
   <br>
-  <div class="mx-auto" style="padding-left: 100px; margin: 20px">
-    <img src="{{ url_for('video_feed', room = room_number) }}">
+  <div class="mx-auto" style="padding-left: 100px; margin: 20px; align-self: center;">
+    <img  style="display: block;
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+  " src="{{ url_for('video_feed', room = room_number) }}">
   </div>
   <div class="mx-auto" style="width: 150px;">
     <a href="http://127.0.0.1:80/">

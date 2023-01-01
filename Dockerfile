@@ -13,4 +13,4 @@ RUN pip install -r requirements.txt
 RUN pip3 install dlib --force-reinstall --no-cache-dir --global-option=build_ext
 
 EXPOSE 80
-CMD [ "python3", "./iot_app.py"]
+CMD [ "python3", "./app.py"]

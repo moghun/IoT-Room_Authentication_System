@@ -12,8 +12,9 @@ import uuid
 import zmq
 import base64
 import imagezmq
+import time
 
-from threading import Thread
+from threading import Thread, Event
 
 from frameStream import frameStream, VideoStreamWidget
 
@@ -26,7 +27,10 @@ currentFile = Path(__file__).parent
 UPLOAD_FOLDER = os.path.join(currentFile, "registrations")
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 room_ids = []
+
+stream_event = Event()
 streaming_flag = False
+streamer = ""
 
 for room in os.listdir(UPLOAD_FOLDER):
     room_ids.append(room)
@@ -46,9 +50,13 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
 def upload_file():
+    time.sleep(2)
     global room_ids
     global streaming_flag
-    streaming_flag = False
+    global streamer
+    if streaming_flag == True:
+        streaming_flag = False
+        stream_event.set()
     return render_template('upload.html', roomIDs = room_ids)
 
 
@@ -56,7 +64,10 @@ def upload_file():
 def success():
     global room_ids
     global streaming_flag
-    streaming_flag = False
+    global streamer
+    if streaming_flag == True:
+        streaming_flag = False
+        stream_event.set()
 
     if 'file' not in request.files:
         # flash('No file part')
@@ -142,7 +153,7 @@ def get_user_name(uid):
         lines = file.readlines()
         for line in lines:
             if uid in line:
-                print(line.split("\t"))
+                #print(line.split("\t"))
                 name = line.split("\t")[2]
                 mail = line.split("\t")[1]
                 break
@@ -180,7 +191,7 @@ def gen(room_input="ALL"):
         return encodeList
 
     encodeListknown = encoding_img(IMAGE_FILES)
-    while True:
+    while streaming_flag:
         rpi_name, img = image_hub.recv_image()
         
 #        success, img = cap.read()
@@ -225,25 +236,33 @@ def gen(room_input="ALL"):
         frame = cv2.imencode('.jpg', img)[1].tobytes()
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         key = cv2.waitKey(20)
-        if key == 27:
+        if key == 27:     
             break
+    
 
 def start_streaming():
     fs = frameStream()
     fs.start()
+    print("STREAM THREAD JOINED")
+    
 
 @app.route('/video_feed')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
     room_number = request.args.get('room', None)
     global streaming_flag
+    global streamer
+    print("Other frame stream:", streaming_flag)
     if streaming_flag == False:
         streaming_flag = True
         streamer = Thread(target = start_streaming, args=())
         streamer.start()
+        print("Remote capture started")
     return Response(gen(room_number),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-if __name__ == "__main__":
-    app.run(debug=True , host="0.0.0.0", port="80")
+def start_server():
+    app.run(debug=False , host="0.0.0.0", port="80")
+    print("Program ended")
+
