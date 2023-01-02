@@ -24,4 +24,4 @@ System uses ZMQ PUB-SUB sockets to stream video from multiple devices and authen
 
 <img width="1433" alt="2" src="https://user-images.githubusercontent.com/89805772/210205596-d9d5215d-4093-4ee1-a7d8-9cba2940346b.png">
 
-<img width="1433" alt="1" src="https://user-images.githubusercontent.com/89805772/210205620-768bfb94-2214-46ba-874c-467202e8e2a8.png">
+<img width="1433" alt="3" src="https://user-images.githubusercontent.com/89805772/210205989-e62c14f5-37a4-4e25-8246-d1eb5f56bd07.png">
