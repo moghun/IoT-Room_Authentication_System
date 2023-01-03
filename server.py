@@ -29,7 +29,7 @@ stream_event = Event()
 streaming_flag = False
 streamer = ""
 image_hub = ""
-connect_to_p = "tcp://localhost:5555"
+connect_to_p = "tcp://0.0.0.0:5555"
 multiple_devices = False
 
 for room in os.listdir(UPLOAD_FOLDER):
@@ -258,7 +258,7 @@ def video_feed():
     global connect_to_p
 
     print("Other frame stream:", streaming_flag)
-    new_cnct = 'tcp://localhost:555' + str(5+int(room_number))
+    new_cnct = 'tcp://0.0.0.0:555' + str(5+int(room_number))
     if new_cnct != connect_to_p:
         if image_hub != "":
             image_hub.zmq_socket.close()
@@ -269,7 +269,6 @@ def video_feed():
         image_hub.zmq_socket.setsockopt(zmq.CONFLATE, 1)
         image_hub.zmq_socket.setsockopt(zmq.RCVHWM, 1)
         image_hub.zmq_socket.setsockopt( zmq.LINGER, 0 )
-        print("aaaaaaaa")
 
     print(connect_to_p)
 
