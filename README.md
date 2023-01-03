@@ -21,7 +21,7 @@ System uses ZMQ PUB-SUB sockets to stream video from multiple devices and authen
 
 ## Authentication with multiple cameras
 
-###Initializing the server
+### Initializing the server
 
 ```bash
 > python3 install -r requirements.txt
