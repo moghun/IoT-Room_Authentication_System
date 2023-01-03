@@ -13,12 +13,17 @@ import zmq
 import base64
 import imagezmq
 import time
+import json
 
 from threading import Thread, Event
 
 from frameStream import frameStream, VideoStreamWidget
 
 
+file = open("config.json")
+config = json.load(file)
+ip = config['ip_address']
+file.close()
 
 currentFile = Path(__file__).parent
 UPLOAD_FOLDER = os.path.join(currentFile, "registrations")
@@ -29,7 +34,7 @@ stream_event = Event()
 streaming_flag = False
 streamer = ""
 image_hub = ""
-connect_to_p = "tcp://0.0.0.0:5555"
+connect_to_p = 'tcp://' + ip +':5555'
 multiple_devices = False
 
 for room in os.listdir(UPLOAD_FOLDER):
@@ -258,7 +263,7 @@ def video_feed():
     global connect_to_p
 
     print("Other frame stream:", streaming_flag)
-    new_cnct = 'tcp://0.0.0.0:555' + str(5+int(room_number))
+    new_cnct = 'tcp://' + ip +':555' + str(5+int(room_number))
     if new_cnct != connect_to_p:
         if image_hub != "":
             image_hub.zmq_socket.close()
