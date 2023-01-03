@@ -4,25 +4,37 @@ Real-time room authentication system that manages multiple cameras with Flask, f
 
 System uses ZMQ PUB-SUB sockets to stream video from multiple devices and authenticate on the server. (requires slight adjustments)
 
-## Initialization on the server computer (works with local webcam)
+## Authentication with local camera
+
+###Initialization on the server computer (works with local webcam)
 
 ```bash
 > python3 install -r requirements.txt
 > python3 app.py
 ```
 
-## Initialization on a IoT camera device
-
-```bash
-> python3 install -r requirements.txt
-> python3 frameServer.py
-```
-
-## Run docker (only on Linux machines)
+### Run docker (only on Linux machines)
 
 ```bash
 > bash start.sh
 ```
+
+## Authentication with multiple cameras
+
+###Initializing the server
+
+```bash
+> python3 install -r requirements.txt
+> python3 app.py multiple_devices
+```
+
+### Initializing remote camera (on each device)
+
+```bash
+> python3 install -r requirements.txt
+> python3 frameServer.py <room_number>
+```
+
 
 ## User flow
 
