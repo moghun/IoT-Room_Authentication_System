@@ -16,6 +16,11 @@ System uses ZMQ PUB-SUB sockets to stream video from multiple devices and authen
 > python3 frameServer.py
 ```
 
+## Run docker (only for Linux machines because of /dev/video0)
+```bash
+> bash start.sh
+```
+
 ## User flow
 
 * Upload a photograph and enter credientials of the person for register a room
