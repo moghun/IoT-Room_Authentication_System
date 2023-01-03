@@ -6,7 +6,7 @@ System uses ZMQ PUB-SUB sockets to stream video from multiple devices and authen
 
 ## Authentication with local camera
 
-###Initialization on the server computer (works with local webcam)
+### Initialization on the server computer (works with local webcam)
 
 ```bash
 > python3 install -r requirements.txt
