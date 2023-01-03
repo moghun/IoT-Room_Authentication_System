@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask import Flask, Response
 import requests
 import time
+import sys
 
 import zmq
 import base64
@@ -37,7 +38,9 @@ class frameStream():
  
 class VideoStreamWidget(object):
     def __init__(self, src=0, onRPI=False):
-        self.sender = imagezmq.ImageSender(connect_to='tcp://*:5555', REQ_REP=False)
+        connect_to_p = 'tcp://*:555' + str(5+int(src))
+        print("frame_Stream", connect_to_p)
+        self.sender = imagezmq.ImageSender(connect_to=connect_to_p, REQ_REP=False)
         self.sender.zmq_socket.setsockopt(zmq.CONFLATE, 1)
         self.sender.zmq_socket.setsockopt(zmq.SNDHWM, 1)
         self.sender.zmq_socket.setsockopt( zmq.LINGER, 0 )
@@ -72,13 +75,23 @@ class VideoStreamWidget(object):
         
 
 if __name__ == '__main__':
-    video_stream_widget = VideoStreamWidget()
-    while True:
-        try:
-            video_stream_widget.send_frame()
-            
-        except AttributeError:
-            pass
+    if len(sys.argv) > 1:
+        video_stream_widget = VideoStreamWidget(sys.argv[1])
+        while True:
+            try:
+                video_stream_widget.send_frame()
+                
+            except AttributeError:
+                pass
+    else:
+        video_stream_widget = VideoStreamWidget()
+        while True:
+            try:
+                video_stream_widget.send_frame()
+                
+            except AttributeError:
+                pass
+        
 
 
 

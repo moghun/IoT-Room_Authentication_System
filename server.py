@@ -18,10 +18,7 @@ from threading import Thread, Event
 
 from frameStream import frameStream, VideoStreamWidget
 
-image_hub = imagezmq.ImageHub(open_port='tcp://localhost:5555', REQ_REP=False)
-image_hub.zmq_socket.setsockopt(zmq.CONFLATE, 1)
-image_hub.zmq_socket.setsockopt(zmq.RCVHWM, 1)
-image_hub.zmq_socket.setsockopt( zmq.LINGER, 0 )
+
 
 currentFile = Path(__file__).parent
 UPLOAD_FOLDER = os.path.join(currentFile, "registrations")
@@ -31,6 +28,9 @@ room_ids = []
 stream_event = Event()
 streaming_flag = False
 streamer = ""
+image_hub = ""
+connect_to_p = "tcp://localhost:5555"
+multiple_devices = False
 
 for room in os.listdir(UPLOAD_FOLDER):
     room_ids.append(room)
@@ -240,8 +240,8 @@ def gen(room_input="ALL"):
             break
     
 
-def start_streaming():
-    fs = frameStream()
+def start_streaming(room_number):
+    fs = frameStream(room_number)
     fs.start()
     print("STREAM THREAD JOINED")
     
@@ -252,17 +252,36 @@ def video_feed():
     room_number = request.args.get('room', None)
     global streaming_flag
     global streamer
+    global image_hub
+    global connect_to_p
+
     print("Other frame stream:", streaming_flag)
-    if streaming_flag == False:
+    new_cnct = 'tcp://localhost:555' + str(5+int(room_number))
+    if new_cnct != connect_to_p:
+        if image_hub != "":
+            image_hub.zmq_socket.close()
+            # image_hub.zmq_context.destroy()
+
+        connect_to_p = new_cnct
+        image_hub = imagezmq.ImageHub(open_port=connect_to_p, REQ_REP=False)
+        image_hub.zmq_socket.setsockopt(zmq.CONFLATE, 1)
+        image_hub.zmq_socket.setsockopt(zmq.RCVHWM, 1)
+        image_hub.zmq_socket.setsockopt( zmq.LINGER, 0 )
+
+    print(connect_to_p)
+
+    if streaming_flag == False and multiple_devices == False:
         streaming_flag = True
-        streamer = Thread(target = start_streaming, args=())
+        streamer = Thread(target = start_streaming, args=(room_number,))
         streamer.start()
         print("Remote capture started")
     return Response(gen(room_number),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-def start_server():
+def start_server(md=False):
+    global multiple_devices
+    multiple_devices = md
     app.run(debug=False , host="0.0.0.0", port="80")
     print("Program ended")
 
