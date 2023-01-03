@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask import Flask, Response
 import requests
 import time
+import sys
 
 import zmq
 import base64
@@ -36,16 +37,15 @@ class frameStream():
 
  
 class VideoStreamWidget(object):
-    def __init__(self, src=0, onRPI=False):
-        self.sender = imagezmq.ImageSender(connect_to='tcp://*:5555', REQ_REP=False)
+    def __init__(self, src=0):
+        connect_to_p = 'tcp://*:555' + str(5+int(src))
+        print("frame_Stream", connect_to_p)
+        self.sender = imagezmq.ImageSender(connect_to=connect_to_p, REQ_REP=False)
         self.sender.zmq_socket.setsockopt(zmq.CONFLATE, 1)
         self.sender.zmq_socket.setsockopt(zmq.SNDHWM, 1)
         self.sender.zmq_socket.setsockopt( zmq.LINGER, 0 )
 
-        if onRPI == False:
-            src = 0
-
-        self.capture = cv2.VideoCapture(src)
+        self.capture = cv2.VideoCapture(0)
         self.capture.set(cv2.CAP_PROP_BUFFERSIZE, 25)
         self.capture.set(3, 160)
         self.capture.set(4,120)
@@ -66,19 +66,30 @@ class VideoStreamWidget(object):
     def send_frame(self):
         # Display frames in main program
         self.sender.send_image(socket.gethostname(), cv2.resize(self.frame, (640, 480), fx=0, fy= 0,interpolation = cv2.INTER_CUBIC))
+        #cv2.imshow("im",self.frame)
         key = cv2.waitKey(int(200))
             
 
         
 
 if __name__ == '__main__':
-    video_stream_widget = VideoStreamWidget()
-    while True:
-        try:
-            video_stream_widget.send_frame()
-            
-        except AttributeError:
-            pass
+    if len(sys.argv) > 1:
+        video_stream_widget = VideoStreamWidget(sys.argv[1])
+        while True:
+            try:
+                video_stream_widget.send_frame()
+                
+            except AttributeError:
+                pass
+    else:
+        video_stream_widget = VideoStreamWidget()
+        while True:
+            try:
+                video_stream_widget.send_frame()
+                
+            except AttributeError:
+                pass
+        
 
 
 
