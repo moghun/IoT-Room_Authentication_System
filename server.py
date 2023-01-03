@@ -193,6 +193,7 @@ def gen(room_input="ALL"):
     encodeListknown = encoding_img(IMAGE_FILES)
     while streaming_flag:
         rpi_name, img = image_hub.recv_image()
+        #print(rpi_name)
         
 #        success, img = cap.read()
         imgc = cv2.resize(img, (0, 0), None, 0.25, 0.25)
@@ -224,7 +225,7 @@ def gen(room_input="ALL"):
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cv2.rectangle(img, (x1 - 65, y2), (x2 + 65, y2+70), (0, 255, 0), 2, cv2.FILLED)
                 cv2.putText(img, name+" - "+mail, (x1 - 60, y2 + 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-
+                
             else:
                 y1, x2, y2, x1 = faceloc
                 # multiply locations by 4 because we above we reduced our webcam input image by 0.25
@@ -232,6 +233,7 @@ def gen(room_input="ALL"):
                 cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 5)
                 cv2.rectangle(img, (x1, y2 - 35), (x2, y2), (255, 0, 255), 5, cv2.FILLED)
                 cv2.putText(img, "NOT REGISTERED", (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                
 
         frame = cv2.imencode('.jpg', img)[1].tobytes()
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -267,6 +269,7 @@ def video_feed():
         image_hub.zmq_socket.setsockopt(zmq.CONFLATE, 1)
         image_hub.zmq_socket.setsockopt(zmq.RCVHWM, 1)
         image_hub.zmq_socket.setsockopt( zmq.LINGER, 0 )
+        print("aaaaaaaa")
 
     print(connect_to_p)
 
@@ -275,6 +278,10 @@ def video_feed():
         streamer = Thread(target = start_streaming, args=(room_number,))
         streamer.start()
         print("Remote capture started")
+
+    if streaming_flag == False and multiple_devices == True:
+        streaming_flag = True
+
     return Response(gen(room_number),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
