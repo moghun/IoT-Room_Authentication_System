@@ -4,9 +4,18 @@ FROM python:3.8
 WORKDIR /
 
 # Install app dependencies
-COPY requirements.txt ./
+COPY ./ ./
 
 RUN /usr/local/bin/python -m pip install --upgrade pip
+RUN apt-get update
+RUN apt install -y libgl1-mesa-glx
+RUN apt install kmod
+RUN apt-get install make
+RUN apt-get install gcc
+RUN apt-get install libelf-dev
+RUN apt-get install -y v4l-utils
+RUN apt-get install -y sudo
+RUN sudo usermod -a -G video root
 RUN pip install --upgrade setuptools
 RUN pip install cmake
 RUN pip install -r requirements.txt
