@@ -13,11 +13,6 @@ System uses ZMQ PUB-SUB sockets to stream video from multiple devices and authen
 > python3 app.py
 ```
 
-### Run docker (only on Linux machines)
-
-```bash
-> bash start.sh
-```
 
 ## Authentication with multiple cameras
 
@@ -34,6 +29,7 @@ System uses ZMQ PUB-SUB sockets to stream video from multiple devices and authen
 > python3 install -r requirements.txt
 > python3 frameServer.py <room_number>
 ```
+### Docker container currently not working
 
 
 ## User flow
