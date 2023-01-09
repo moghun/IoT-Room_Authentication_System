@@ -1,3 +1,7 @@
+# BEFORE RUNNING THE PROGRAM
+# RUN THIS IN TERMINAL
+# pip3 install dlib --force-reinstall --no-cache-dir --global-option=build_ext
+
 import server
 import frameStream
 import sys
