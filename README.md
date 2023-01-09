@@ -31,6 +31,11 @@ System uses ZMQ PUB-SUB sockets to stream video from multiple devices and authen
 ```
 ### Docker container currently not working
 
+## In case of dlib error, try this
+```bash
+> pip3 install dlib --force-reinstall --no-cache-dir --global-option=build_ext
+```
+
 
 ## User flow
 
