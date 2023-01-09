@@ -1,4 +1,4 @@
 00c8d0c5-c0dc-4e82-b0b9-0690fc23d0ed	kgulbudak@sabanciuniv.edu	Kalender	4
 d2781824-25e7-4a01-8956-dd60156886b8	ayvazb17@itu.edu.tr	Bora	2 3 5
-987e1bac-8964-4eca-82f7-790bd48430b7	morhun@sabanciuniv.edu	Orhun	1 2 4 3
-46b59533-6f14-4fe2-95f5-f89c5c3f0d15	thcnkrmn@gmail.com	Can	1 5
+46b59533-6f14-4fe2-95f5-f89c5c3f0d15	thcnkrmn@gmail.com	Can	1 5 4
+987e1bac-8964-4eca-82f7-790bd48430b7	morhun@sabanciuniv.edu	Orhun	1 2 4 3 5 6

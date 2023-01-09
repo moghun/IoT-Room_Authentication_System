@@ -136,7 +136,7 @@ def register_to_users(username, email, room):
                 lines.remove(line)
                 lines.append(nl)
                 exist = True
-                uid = line.split("   ")[0]
+                uid = line.split("\t")[0]
                 break
 
     with open("users/users.txt", 'w') as f:
