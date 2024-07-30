@@ -2,7 +2,7 @@
 
 Real-time room authentication system that manages multiple cameras with Flask, face-recognition and imagezmq libraries.
 
-System uses ZMQ PUB-SUB sockets to stream video from multiple devices and authenticate on the server. (requires slight adjustments)
+System uses ZMQ PUB-SUB sockets to stream video from multiple devices and authenticate on the server. (requires adjustments on source files)
 
 ## Authentication with local camera
 
